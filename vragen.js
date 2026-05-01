@@ -261,54 +261,6 @@ window.BBV_QUESTIONS = [
     "source": "Zelf bedacht (toets-instellingen of BBV-algemeen)"
   },
   {
-    "id": 23,
-    "question": "Bij het bepalen van de score/geslaagd in deze toets geldt:",
-    "options": [
-      "a) 50% cesuur",
-      "b) 60% cesuur",
-      "c) 70% cesuur",
-      "d) 80% cesuur"
-    ],
-    "correct": 2,
-    "source": "Zelf bedacht (toets-instellingen of BBV-algemeen)"
-  },
-  {
-    "id": 24,
-    "question": "In deze BBV Kennistoets levert een goed antwoord op:",
-    "options": [
-      "a) 1 munt",
-      "b) 3 munten",
-      "c) 5 munten",
-      "d) 10 munten"
-    ],
-    "correct": 2,
-    "source": "Zelf bedacht (toets-instellingen of BBV-algemeen)"
-  },
-  {
-    "id": 25,
-    "question": "Bonusmunten krijg je als je:",
-    "options": [
-      "a) Minstens 70% haalt",
-      "b) 100% score haalt",
-      "c) Meer dan 5 munten hebt",
-      "d) De toets binnen 1 minuut afrondt"
-    ],
-    "correct": 1,
-    "source": "Zelf bedacht (toets-instellingen of BBV-algemeen)"
-  },
-  {
-    "id": 26,
-    "question": "Wat gebeurt er met de vragen in elke nieuwe ronde van de toets?",
-    "options": [
-      "a) Altijd dezelfde volgorde",
-      "b) Willekeurige volgorde en er worden 10 uit 30 gekozen",
-      "c) Willekeurige volgorde maar altijd alle 30",
-      "d) Alleen de eerste 10"
-    ],
-    "correct": 1,
-    "source": "Zelf bedacht (toets-instellingen of BBV-algemeen)"
-  },
-  {
     "id": 27,
     "question": "Welke statement past het best bij het voorzichtigheidsbeginsel?",
     "options": [
