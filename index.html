@@ -64,3 +64,186 @@
     }
 
     .logoCard img{
+      width:min(360px, 85vw);
+      max-height:180px;
+      object-fit:contain;
+      display:block;
+    }
+
+    .btn{
+      margin-top:16px;
+      padding:14px;
+      width:100%;
+      text-align:center;
+      border-radius:14px;
+      font-weight:900;
+      cursor:pointer;
+      background:linear-gradient(135deg,var(--je-pink),var(--je-pink-dark));
+      border:1px solid rgba(255,255,255,.15);
+    }
+    .btn.secondary{background:rgba(255,255,255,.08)}
+
+    .hidden{display:none}
+
+    /* ===== QUIZ ===== */
+    .question{
+      font-size:18px;
+      font-weight:800;
+      margin:12px 0;
+    }
+    .option{
+      background:var(--card);
+      border:1px solid var(--border);
+      padding:12px;
+      border-radius:12px;
+      margin-bottom:10px;
+      cursor:pointer;
+    }
+    .option.correct{background:rgba(34,197,94,.2)}
+    .option.wrong{background:rgba(239,68,68,.2)}
+
+    .result{text-align:center}
+    .result .score{font-size:34px;font-weight:1000;color:var(--je-pink)}
+
+    .small{
+      font-size:12px;
+      color:rgba(255,255,255,.75);
+      line-height:1.35;
+      margin-top:6px;
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="titles">
+      <h1>BBV Kennistoets</h1>
+      <small>JE Consultancy</small>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <!-- START VIEW -->
+    <div id="startView" class="start">
+      <div class="logoWrap">
+        <div class="logoCard">
+          <picture>
+            <source srcset="je-logo.avif" type="image/avif">
+            <img src="je-logo.jpg" alt="JE Consultancy">
+          </picture>
+        </div>
+      </div>
+
+      <div class="small">
+        Elke ronde: <strong>10</strong> vragen.<br>
+        Goed = <strong>+5 munten</strong> · 100% = <strong>+20 bonus</strong>
+      </div>
+
+      <div id="startBtn" class="btn">Start</div>
+    </div>
+
+    <!-- QUIZ VIEW -->
+    <div id="quizView" class="hidden">
+      <div id="question" class="question"></div>
+      <div id="options"></div>
+      <div id="nextBtn" class="btn hidden">Volgende</div>
+    </div>
+
+    <!-- RESULT VIEW -->
+    <div id="resultView" class="result hidden">
+      <div class="score" id="percent">0%</div>
+      <p id="finalScore"></p>
+
+      <div class="btn" onclick="shareScore()">Deel & nodig uit</div>
+      <div class="btn secondary" onclick="startQuiz()">Opnieuw</div>
+    </div>
+
+  </div>
+</div>
+
+<script src="vragen.js"></script>
+<script>
+  const QUESTIONS_PER_RUN = 10;
+  let bank = window.BBV_QUESTIONS || [];
+  let questions = [];
+  let current = 0;
+  let score = 0;
+
+  const startView = document.getElementById('startView');
+  const quizView = document.getElementById('quizView');
+  const resultView = document.getElementById('resultView');
+  const questionEl = document.getElementById('question');
+  const optionsEl = document.getElementById('options');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function shuffle(arr){
+    return arr.sort(() => Math.random() - .5);
+  }
+
+  function startQuiz(){
+    questions = shuffle([...bank]).slice(0, QUESTIONS_PER_RUN);
+    current = 0;
+    score = 0;
+    startView.classList.add('hidden');
+    resultView.classList.add('hidden');
+    quizView.classList.remove('hidden');
+    loadQuestion();
+  }
+
+  function loadQuestion(){
+    nextBtn.classList.add('hidden');
+    const q = questions[current];
+    questionEl.textContent = q.question;
+    optionsEl.innerHTML = '';
+    q.options.forEach((opt,i)=>{
+      const d = document.createElement('div');
+      d.className = 'option';
+      d.textContent = opt;
+      d.onclick = () => select(i,d,q.correct);
+      optionsEl.appendChild(d);
+    });
+  }
+
+  function select(i,el,correct){
+    document.querySelectorAll('.option').forEach(o=>o.onclick=null);
+    if(i===correct){
+      el.classList.add('correct');
+      score++;
+    } else {
+      el.classList.add('wrong');
+      document.querySelectorAll('.option')[correct].classList.add('correct');
+    }
+    nextBtn.classList.remove('hidden');
+  }
+
+  nextBtn.onclick = ()=>{
+    current++;
+    if(current < questions.length) loadQuestion();
+    else finish();
+  };
+
+  function finish(){
+    quizView.classList.add('hidden');
+    const pct = Math.round((score/questions.length)*100);
+    document.getElementById('percent').textContent = pct + '%';
+    document.getElementById('finalScore').textContent = `Score: ${score} / ${questions.length}`;
+    resultView.classList.remove('hidden');
+  }
+
+  document.getElementById('startBtn').onclick = startQuiz;
+
+  function shareScore(){
+    const url = location.href;
+    const text = `Ik deed de BBV Kennistoets en scoorde ${score}/${questions.length}. Doe jij hem ook?`;
+    if(navigator.share){
+      navigator.share({title:'BBV Kennistoets',text,url});
+    } else {
+      navigator.clipboard.writeText(text+' '+url);
+      alert('Link gekopieerd!');
+    }
+  }
+</script>
+</body>
+</html>
