@@ -66,7 +66,6 @@
       inset:0;
       z-index:0;
       pointer-events:none;
-      /* zachte “rimpel/shimmer” met bewegende gradients */
       background:
         radial-gradient(circle at 10% 20%, rgba(255,255,255,.05), transparent 35%),
         radial-gradient(circle at 80% 40%, rgba(255,255,255,.04), transparent 38%),
@@ -190,7 +189,7 @@
     .bonusLine{margin-top:6px;color:rgba(255,255,255,.9);font-weight:800}
     .small{font-size:12px;color:rgba(255,255,255,.7);line-height:1.35}
 
-    /* Startscreen (zonder wit vlak) */
+    /* Startscreen */
     .start{
       display:flex;
       flex-direction:column;
@@ -207,10 +206,9 @@
       padding:18px 0 8px;
     }
 
-    /* Logo zelf: geen achtergrond, wel chique glow */
     .logoPic{
       display:inline-block;
-      padding:6px; /* klein beetje ademruimte zonder “kaart” */
+      padding:6px;
       border-radius:18px;
       background: rgba(255,255,255,.00);
       filter:
@@ -258,7 +256,7 @@
     .pulse{animation:pulse 320ms ease-out}
     @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
 
-    /* Kleine toast voor "link gekopieerd" */
+    /* Toast */
     .toast{
       position:fixed;
       left:50%;
@@ -278,6 +276,11 @@
       pointer-events:none;
     }
     .toast.show{opacity:1;}
+
+    /* ✅ HARD FIX: startscherm (incl logo) forceren weg zodra we starten */
+    body.in-quiz #startView{
+      display:none !important;
+    }
   </style>
 </head>
 
@@ -291,6 +294,7 @@
         <h1>BBV Kennistoets</h1>
         <small>JE Consultancy</small>
       </div>
+
       <div class="coins" id="coinsBadge">
         <span class="coinDot" aria-hidden="true"></span>
         Munten: <span id="coins">0</span>
@@ -314,6 +318,7 @@
         <div class="small" style="margin-top:6px">
           Elke ronde: <strong>10</strong> willekeurige vragen. Goed antwoord = <strong>+5 munten</strong>. 100% = <strong>+20 bonus</strong>.
         </div>
+
         <div id="startBtn" class="btn" style="margin-top:16px; width:100%">Start</div>
       </div>
 
@@ -335,7 +340,6 @@
       <!-- RESULT VIEW -->
       <div id="resultView" class="result hidden">
         <div class="score" id="percent">0%</div>
-        <div id="status" style="font-weight:900"></div>
         <p>Score: <strong id="finalScore"></strong></p>
         <p>Munten verdiend: <strong id="finalCoins"></strong></p>
         <p class="bonusLine hidden" id="bonusLine"></p>
@@ -354,7 +358,6 @@
   <script src="vragen.js"></script>
   <script>
     // ===== Instellingen =====
-    const PASS_PERCENT = 70;
     const QUESTIONS_PER_RUN = 10;
     const COINS_PER_GOOD = 5;
     const BONUS_COINS_100 = 20;
@@ -388,7 +391,6 @@
     const coinPopLayer = document.getElementById('coinPopLayer');
 
     const percentEl = document.getElementById('percent');
-    const statusEl = document.getElementById('status');
     const finalScoreEl = document.getElementById('finalScore');
     const finalCoinsEl = document.getElementById('finalCoins');
     const bonusLine = document.getElementById('bonusLine');
@@ -410,11 +412,15 @@
       return copy.slice(0, Math.min(n, copy.length));
     }
 
+    // ✅ Extra-robuste show() (voor iOS): class + inline display
     function show(view){
-      startView.classList.add('hidden');
-      quizView.classList.add('hidden');
-      resultView.classList.add('hidden');
+      const views = [startView, quizView, resultView];
+      views.forEach(v => {
+        v.classList.add('hidden');
+        v.style.display = 'none';
+      });
       view.classList.remove('hidden');
+      view.style.display = 'block';
     }
 
     function showCoinPop(amount){
@@ -526,7 +532,6 @@
       }
 
       percentEl.textContent = pct + '%';
-      statusEl.textContent = (pct >= PASS_PERCENT) ? 'Geslaagd' : 'Onvoldoende';
       finalScoreEl.textContent = score + ' / ' + total;
       finalCoinsEl.textContent = String(coins);
 
@@ -566,26 +571,31 @@
     }
 
     // ===== Buttons =====
-    
-startBtn.onclick = ()=>{
-  if(!bank || bank.length === 0){
-    qEl.textContent = 'Kon vragenbank niet laden.';
-    show(quizView);
-    return;
-  }
+    startBtn.onclick = ()=>{
+      if(!bank || bank.length === 0){
+        qEl.textContent = 'Kon vragenbank niet laden. Controleer of vragen.js naast index.html staat.';
+        show(quizView);
+        return;
+      }
 
-  // 🔥 DIT WAS DE MISSENDE STAP
-  startView.classList.add('hidden');
+      // ✅ HARD FIX: forceer startView echt weg (iOS-proof)
+      document.body.classList.add('in-quiz');
+      startView.classList.add('hidden');
+      startView.style.display = 'none';
 
-  startQuiz();
-};
-
+      startQuiz();
+    };
 
     againBtn.onclick = startQuiz;
-    backBtn.onclick = ()=> show(startView);
+
+    backBtn.onclick = ()=>{
+      document.body.classList.remove('in-quiz');
+      show(startView);
+    };
+
     shareBtn.onclick = shareScore;
 
-    // init
+    // init (iOS-safe)
     show(startView);
   </script>
 </body>
