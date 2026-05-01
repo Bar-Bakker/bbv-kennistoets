@@ -4,11 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>BBV Kennistoets</title>
+
   <style>
     :root{
       --je-pink:#e6005c; --je-pink-dark:#8b002f; --bg:#0f172a; --card:#1e293b;
       --text:#fff; --muted:rgba(255,255,255,.75); --border:rgba(255,255,255,.15);
-      --good:#22c55e; --bad:#ef4444; --gold:#f7c948; --gold-dark:#b88700;
+      --good:#22c55e; --bad:#ef4444;
     }
     *{box-sizing:border-box}
     body{
@@ -24,431 +25,42 @@
       align-items:center;
       justify-content:center;
       padding:16px;
-      -webkit-tap-highlight-color:transparent;
-      touch-action:manipulation;
     }
-    .wrap{width:100%;max-width:560px;position:relative}
 
-    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+    .wrap{width:100%;max-width:560px}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
     .titles h1{margin:0;font-size:20px;font-weight:900}
     .titles small{color:var(--muted)}
 
-    .coins{
-      background:linear-gradient(135deg,var(--je-pink),var(--je-pink-dark));
-      padding:8px 12px;border-radius:999px;font-weight:900;display:flex;align-items:center;gap:8px;
-      white-space:nowrap;border:1px solid rgba(255,255,255,.12)
-    }
-    .coinDot{
-      width:16px;height:16px;border-radius:999px;
-      background:radial-gradient(circle at 30% 30%,#fff3,transparent 45%),
-                linear-gradient(135deg,var(--gold),var(--gold-dark));
-      border:1px solid rgba(255,255,255,.25);
-      box-shadow:0 2px 10px rgba(0,0,0,.25);
-      flex:0 0 auto;
+    .card{
+      background:rgba(30,41,59,.92);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
     }
 
-    .card{background:rgba(30,41,59,.92);border:1px solid var(--border);border-radius:18px;padding:16px}
-    .top{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);gap:10px;flex-wrap:wrap}
-    .question{font-size:18px;font-weight:800;margin:12px 0;line-height:1.25}
-
-    .option{
-      background:var(--card);border:1px solid var(--border);
-      padding:12px;border-radius:12px;margin-bottom:10px;user-select:none;
-    }
-    .option.correct{background:rgba(34,197,94,.2);border-color:var(--good)}
-    .option.wrong{background:rgba(239,68,68,.2);border-color:var(--bad)}
-
-    .btn{
-      margin-top:12px;padding:12px;text-align:center;border-radius:12px;font-weight:900;
-      background:linear-gradient(135deg,var(--je-pink),var(--je-pink-dark));
-      border:1px solid rgba(255,255,255,.12);
-      user-select:none;
-      cursor:pointer;
-    }
-    .btn.secondary{background:rgba(255,255,255,.06)}
-    .btnRow{display:flex;gap:10px;flex-wrap:wrap}
-    .btnRow .btn{flex:1}
-    .hidden{display:none}
-
-    .result{text-align:center}
-    .result .score{font-size:34px;font-weight:1000;color:var(--je-pink);margin:10px 0}
-    .bonusLine{margin-top:6px;color:rgba(255,255,255,.9);font-weight:800}
-    .small{font-size:12px;color:rgba(255,255,255,.7);line-height:1.35}
-
-    /* Startscreen */
+    /* ===== STARTSCHERM ===== */
     .start{
       display:flex;
       flex-direction:column;
       align-items:center;
-      justify-content:center;
-      padding:10px 6px 6px;
       text-align:center;
     }
+
     .logoWrap{
       width:100%;
       display:flex;
       justify-content:center;
-      align-items:center;
-      padding:18px 0 8px;
-    }
-    img.logo{
-      width:min(420px, 88%);
-      height:auto;
-      display:block;
-      filter: drop-shadow(0 12px 20px rgba(0,0,0,.35));
-    }
-    .logoFallback{
-      font-size:72px;
-      font-weight:1000;
-      letter-spacing:-2px;
-      background:linear-gradient(135deg,var(--je-pink),var(--je-pink-dark));
-      -webkit-background-clip:text;
-      background-clip:text;
-      color:transparent;
-      text-shadow:0 10px 25px rgba(0,0,0,.35);
-      line-height:1;
-      padding:10px 0;
+      margin:20px 0 10px;
     }
 
-    /* +munten animatie */
-    .coinPopLayer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999}
-    .coinPop{
-      position:absolute;display:inline-flex;align-items:center;gap:8px;
-      padding:10px 12px;border-radius:999px;font-weight:1000;
-      background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.18);
-      backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-      transform:translate3d(0,0,0);
-      animation:floatUp 900ms ease-out forwards;
-    }
-    .coinPop .coinDot{width:18px;height:18px}
-    .coinPop .text{color:#fff;letter-spacing:.2px}
-    @keyframes floatUp{
-      0%{opacity:0;transform:translate3d(0,14px,0) scale(.96)}
-      15%{opacity:1;transform:translate3d(0,0,0) scale(1)}
-      85%{opacity:1;transform:translate3d(0,-34px,0) scale(1)}
-      100%{opacity:0;transform:translate3d(0,-48px,0) scale(1.02)}
-    }
-    .pulse{animation:pulse 320ms ease-out}
-    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
-
-    /* Kleine toast voor "link gekopieerd" */
-    .toast{
-      position:fixed;
-      left:50%;
-      bottom:18px;
-      transform:translateX(-50%);
-      background:rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.18);
-      padding:10px 12px;
-      border-radius:999px;
-      color:#fff;
-      font-weight:800;
-      z-index:9999;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      opacity:0;
-      transition:opacity .18s ease;
-      pointer-events:none;
-    }
-    .toast.show{opacity:1;}
-  </style>
-</head>
-<body>
-<div class="coinPopLayer" id="coinPopLayer"></div>
-<div class="toast" id="toast">Link gekopieerd</div>
-
-<div class="wrap">
-  <div class="header">
-    <div class="titles">
-      <h1>BBV Kennistoets</h1>
-      <small>JE Consultancy</small>
-    </div>
-    <div class="coins" id="coinsBadge"><span class="coinDot" aria-hidden="true"></span> Munten: <span id="coins">0</span></div>
-  </div>
-
-  <div class="card">
-    <!-- START VIEW -->
-    <div id="startView" class="start">
-      <div class="logoWrap">
-        <!-- Zet je JE-logo in dezelfde map als index.html en noem het: je-logo.jpg -->
-        <img class="logo" id="jeLogo" src="je-logo.jpg" alt="JE Consultancy" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='block'" />
-        <div class="logoFallback" id="logoFallback" style="display:none">JE</div>
-      </div>
-      <div class="small" style="margin-top:6px">
-        Elke ronde: <strong>10</strong> willekeurige vragen. Goed antwoord = <strong>+5 munten</strong>. 100% = <strong>+20 bonus</strong>.
-      </div>
-      <div id="startBtn" class="btn" style="margin-top:16px; width:100%">Start</div>
-    </div>
-
-    <!-- QUIZ VIEW -->
-    <div id="quizView" class="hidden">
-      <div class="top">
-        <div>Vraag <span id="qIndex">1</span>/<span id="qTotal">10</span></div>
-        <div>Score: <span id="score">0</span></div>
-      </div>
-
-      <div id="question" class="question"></div>
-      <div id="options"></div>
-
-      <div class="btnRow">
-        <div id="next" class="btn hidden">Volgende</div>
-      </div>
-    </div>
-
-    <!-- RESULT VIEW -->
-    <div id="resultView" class="result hidden">
-      <div class="score" id="percent">0%</div>
-      <div id="status" style="font-weight:900"></div>
-      <p>Score: <strong id="finalScore"></strong></p>
-      <p>Munten verdiend: <strong id="finalCoins"></strong></p>
-      <p class="bonusLine hidden" id="bonusLine"></p>
-
-      <div class="btnRow" style="margin-top:12px">
-        <div id="shareBtn" class="btn">Deel & nodig uit</div>
-        <div id="againBtn" class="btn secondary">Opnieuw (nieuwe set 10)</div>
-      </div>
-      <div class="btnRow">
-        <div id="backBtn" class="btn secondary">Terug naar beginscherm</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="vragen.js"></script>
-<script>
-  // ===== Instellingen =====
-  const PASS_PERCENT = 70;
-  const QUESTIONS_PER_RUN = 10;
-  const COINS_PER_GOOD = 5;
-  const BONUS_COINS_100 = 20;
-
-  // ===== State =====
-  let bank = (window.BBV_QUESTIONS || []);
-  let questions = [];
-  let current = 0;
-  let score = 0;
-  let coins = 0;
-  let answered = false;
-
-  // ===== Elements =====
-  const startView = document.getElementById('startView');
-  const quizView = document.getElementById('quizView');
-  const resultView = document.getElementById('resultView');
-
-  const startBtn = document.getElementById('startBtn');
-  const shareBtn = document.getElementById('shareBtn');
-  const againBtn = document.getElementById('againBtn');
-  const backBtn = document.getElementById('backBtn');
-
-  const qEl = document.getElementById('question');
-  const optEl = document.getElementById('options');
-  const nextBtn = document.getElementById('next');
-  const qIdx = document.getElementById('qIndex');
-  const qTot = document.getElementById('qTotal');
-  const scoreEl = document.getElementById('score');
-  const coinEl = document.getElementById('coins');
-  const coinsBadge = document.getElementById('coinsBadge');
-  const coinPopLayer = document.getElementById('coinPopLayer');
-
-  const percentEl = document.getElementById('percent');
-  const statusEl = document.getElementById('status');
-  const finalScoreEl = document.getElementById('finalScore');
-  const finalCoinsEl = document.getElementById('finalCoins');
-  const bonusLine = document.getElementById('bonusLine');
-
-  const toast = document.getElementById('toast');
-
-  // ===== Helpers =====
-  function shuffle(a){
-    for(let i=a.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [a[i],a[j]]=[a[j],a[i]];
-    }
-    return a;
-  }
-
-  function pickRandom(arr, n){
-    const copy = arr.slice();
-    shuffle(copy);
-    return copy.slice(0, Math.min(n, copy.length));
-  }
-
-  function show(view){
-    startView.classList.add('hidden');
-    quizView.classList.add('hidden');
-    resultView.classList.add('hidden');
-    view.classList.remove('hidden');
-  }
-
-  function showCoinPop(amount){
-    const rect = coinsBadge.getBoundingClientRect();
-    const x = Math.max(12, rect.left + rect.width/2 - 60);
-    const y = Math.max(12, rect.top + rect.height + 6);
-
-    const pop = document.createElement('div');
-    pop.className = 'coinPop';
-    pop.style.left = x + 'px';
-    pop.style.top  = y + 'px';
-
-    const dot = document.createElement('span');
-    dot.className = 'coinDot';
-
-    const txt = document.createElement('span');
-    txt.className = 'text';
-    txt.textContent = '+' + amount + ' munten';
-
-    pop.appendChild(dot);
-    pop.appendChild(txt);
-    coinPopLayer.appendChild(pop);
-
-    coinsBadge.classList.remove('pulse');
-    void coinsBadge.offsetWidth;
-    coinsBadge.classList.add('pulse');
-
-    pop.addEventListener('animationend', ()=>{
-      if(pop && pop.parentNode) pop.parentNode.removeChild(pop);
-    });
-  }
-
-  function toastMsg(msg){
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(()=> toast.classList.remove('show'), 1400);
-  }
-
-  // ===== Quiz =====
-  function startQuiz(){
-    questions = pickRandom(bank, QUESTIONS_PER_RUN);
-    current = 0;
-    score = 0;
-    coins = 0;
-    answered = false;
-
-    qTot.textContent = String(questions.length);
-    scoreEl.textContent = '0';
-    coinEl.textContent = '0';
-
-    bonusLine.classList.add('hidden');
-    bonusLine.textContent = '';
-
-    show(quizView);
-    loadQuestion();
-  }
-
-  function loadQuestion(){
-    answered = false;
-    nextBtn.classList.add('hidden');
-    optEl.innerHTML = '';
-
-    const q = questions[current];
-    qIdx.textContent = String(current+1);
-    qEl.textContent = q.question;
-
-    q.options.forEach((t,i)=>{
-      const d = document.createElement('div');
-      d.className = 'option';
-      d.textContent = t;
-      d.onclick = ()=> select(i,d);
-      optEl.appendChild(d);
-    });
-  }
-
-  function select(i, el){
-    if(answered) return;
-    answered = true;
-
-    const q = questions[current];
-    const all = document.querySelectorAll('.option');
-    for(const o of all){ o.onclick = null; }
-
-    if(i === q.correct){
-      el.classList.add('correct');
-      score++;
-      coins += COINS_PER_GOOD;
-      showCoinPop(COINS_PER_GOOD);
-    } else {
-      el.classList.add('wrong');
-      all[q.correct].classList.add('correct');
+    .logoCard{
+      background:#fff;
+      padding:26px 30px;
+      border-radius:18px;
+      box-shadow:
+        0 18px 40px rgba(0,0,0,.35),
+        0 2px 6px rgba(0,0,0,.2);
     }
 
-    scoreEl.textContent = String(score);
-    coinEl.textContent = String(coins);
-    nextBtn.classList.remove('hidden');
-  }
-
-  function finish(){
-    const total = questions.length;
-    const pct = total ? Math.round((score/total)*100) : 0;
-
-    if(score === total && total > 0){
-      coins += BONUS_COINS_100;
-      coinEl.textContent = String(coins);
-      bonusLine.textContent = 'Bonus: +' + BONUS_COINS_100 + ' munten voor 100% score!';
-      bonusLine.classList.remove('hidden');
-      showCoinPop(BONUS_COINS_100);
-    }
-
-    percentEl.textContent = pct + '%';
-    statusEl.textContent = (pct >= PASS_PERCENT) ? 'Geslaagd' : 'Onvoldoende';
-    finalScoreEl.textContent = score + ' / ' + total;
-    finalCoinsEl.textContent = String(coins);
-
-    show(resultView);
-  }
-
-  nextBtn.onclick = ()=>{
-    current++;
-    if(current < questions.length) loadQuestion();
-    else finish();
-  };
-
-  // ===== Share =====
-  async function shareScore(){
-    const total = questions.length || QUESTIONS_PER_RUN;
-    const pct = total ? Math.round((score/total)*100) : 0;
-    const url = location.href;
-    const text = `Ik scoorde ${pct}% (${score}/${total}) in de BBV Kennistoets. Doe jij hem ook?`;
-
-    // 1) Web Share API
-    if(navigator.share){
-      try{
-        await navigator.share({ title: 'BBV Kennistoets', text, url });
-        return;
-      } catch(e) {
-        // user canceled or not supported
-      }
-    }
-
-    // 2) Clipboard fallback
-    const combined = text + ' ' + url;
-    try{
-      if(navigator.clipboard && navigator.clipboard.writeText){
-        await navigator.clipboard.writeText(combined);
-        toastMsg('Link gekopieerd');
-        return;
-      }
-    } catch(e) {}
-
-    // 3) Last resort prompt
-    window.prompt('Kopieer en deel:', combined);
-  }
-
-  // ===== Buttons =====
-  startBtn.onclick = ()=>{
-    if(!bank || bank.length === 0){
-      qEl.textContent = 'Kon vragenbank niet laden. Controleer of vragen.js naast index.html staat.';
-      show(quizView);
-      return;
-    }
-    startQuiz();
-  };
-
-  againBtn.onclick = startQuiz;
-  backBtn.onclick = ()=> show(startView);
-  shareBtn.onclick = shareScore;
-
-  // init
-  show(startView);
-</script>
-</body>
-</html>
+    .logoCard img{
