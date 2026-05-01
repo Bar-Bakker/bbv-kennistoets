@@ -7,17 +7,27 @@
 
   <style>
     :root{
-      --je-pink:#e6005c; --je-pink-dark:#8b002f; --bg:#0f172a; --card:#1e293b;
-      --text:#fff; --muted:rgba(255,255,255,.75); --border:rgba(255,255,255,.15);
-      --good:#22c55e; --bad:#ef4444;
+      --je-pink:#e6005c;
+      --je-pink-dark:#8b002f;
+      --bg:#0f172a;
+      --card:#1e293b;
+      --text:#fff;
+      --muted:rgba(255,255,255,.75);
+      --border:rgba(255,255,255,.15);
+      --good:#22c55e;
+      --bad:#ef4444;
+      --gold:#f7c948;
+      --gold-dark:#b88700;
     }
+
     *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;
       background:
-        radial-gradient(900px 650px at 20% 0%,rgba(230,0,92,.25),transparent 60%),
-        radial-gradient(900px 650px at 90% 20%,rgba(139,0,47,.25),transparent 55%),
+        radial-gradient(900px 650px at 20% 0%,rgba(230,0,92,.22),transparent 60%),
+        radial-gradient(900px 650px at 90% 20%,rgba(139,0,47,.20),transparent 55%),
         var(--bg);
       color:var(--text);
       min-height:100vh;
@@ -25,225 +35,552 @@
       align-items:center;
       justify-content:center;
       padding:16px;
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
+      position:relative;
+      overflow-x:hidden;
     }
 
-    .wrap{width:100%;max-width:560px}
-    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    /* === Subtiele “water” animatie laag (chique / iPhone-safe) === */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:-20%;
+      z-index:0;
+      pointer-events:none;
+      background:
+        radial-gradient(closest-side at 15% 25%, rgba(255,255,255,.06), transparent 55%),
+        radial-gradient(closest-side at 80% 30%, rgba(255,255,255,.05), transparent 60%),
+        radial-gradient(closest-side at 35% 85%, rgba(255,255,255,.06), transparent 62%),
+        radial-gradient(closest-side at 70% 80%, rgba(230,0,92,.08), transparent 60%),
+        radial-gradient(closest-side at 25% 70%, rgba(139,0,47,.08), transparent 60%);
+      filter: blur(18px);
+      opacity:.55;
+      transform: translate3d(0,0,0);
+      animation: waterDrift 18s ease-in-out infinite alternate;
+    }
+
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      /* zachte “rimpel/shimmer” met bewegende gradients */
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255,255,255,.05), transparent 35%),
+        radial-gradient(circle at 80% 40%, rgba(255,255,255,.04), transparent 38%),
+        radial-gradient(circle at 35% 75%, rgba(255,255,255,.05), transparent 42%),
+        repeating-linear-gradient(
+          115deg,
+          rgba(255,255,255,.018) 0px,
+          rgba(255,255,255,.018) 6px,
+          rgba(255,255,255,0) 18px,
+          rgba(255,255,255,0) 34px
+        );
+      background-size: 140% 140%, 160% 160%, 150% 150%, 260% 260%;
+      background-position: 0% 0%, 100% 0%, 0% 100%, 0% 0%;
+      mix-blend-mode: soft-light;
+      opacity:.35;
+      animation: waterShimmer 22s linear infinite;
+      transform: translate3d(0,0,0);
+    }
+
+    @keyframes waterDrift{
+      0%   { transform: translate3d(-1.5%, -1.0%, 0) scale(1.02); }
+      100% { transform: translate3d( 1.5%,  1.2%, 0) scale(1.04); }
+    }
+    @keyframes waterShimmer{
+      0%   { background-position: 0% 0%, 100% 0%, 0% 100%, 0% 0%; }
+      100% { background-position: 100% 60%, 0% 40%, 80% 0%, 140% 60%; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      body::before, body::after { animation:none !important; }
+      .coinPop { animation:none !important; opacity:0 !important; }
+      .pulse { animation:none !important; }
+    }
+
+    .wrap{
+      width:100%;
+      max-width:560px;
+      position:relative;
+      z-index:1;
+    }
+
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:12px;
+      gap:10px
+    }
     .titles h1{margin:0;font-size:20px;font-weight:900}
     .titles small{color:var(--muted)}
+
+    .coins{
+      background:linear-gradient(135deg,var(--je-pink),var(--je-pink-dark));
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      border:1px solid rgba(255,255,255,.12)
+    }
+    .coinDot{
+      width:16px;height:16px;border-radius:999px;
+      background:
+        radial-gradient(circle at 30% 30%,#fff3,transparent 45%),
+        linear-gradient(135deg,var(--gold),var(--gold-dark));
+      border:1px solid rgba(255,255,255,.25);
+      box-shadow:0 2px 10px rgba(0,0,0,.25);
+      flex:0 0 auto;
+    }
 
     .card{
       background:rgba(30,41,59,.92);
       border:1px solid var(--border);
       border-radius:18px;
       padding:16px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.25);
     }
 
-    /* ===== STARTSCHERM ===== */
-    .start{
+    .top{
       display:flex;
-      flex-direction:column;
-      align-items:center;
-      text-align:center;
+      justify-content:space-between;
+      font-size:14px;
+      color:var(--muted);
+      gap:10px;
+      flex-wrap:wrap
     }
+    .question{font-size:18px;font-weight:800;margin:12px 0;line-height:1.25}
 
-    .logoWrap{
-      width:100%;
-      display:flex;
-      justify-content:center;
-      margin:20px 0 10px;
-    }
-
-    .logoCard{
-      background:#fff;
-      padding:26px 30px;
-      border-radius:18px;
-      box-shadow:
-        0 18px 40px rgba(0,0,0,.35),
-        0 2px 6px rgba(0,0,0,.2);
-    }
-
-    .logoCard img{
-      width:min(360px, 85vw);
-      max-height:180px;
-      object-fit:contain;
-      display:block;
-    }
-
-    .btn{
-      margin-top:16px;
-      padding:14px;
-      width:100%;
-      text-align:center;
-      border-radius:14px;
-      font-weight:900;
-      cursor:pointer;
-      background:linear-gradient(135deg,var(--je-pink),var(--je-pink-dark));
-      border:1px solid rgba(255,255,255,.15);
-    }
-    .btn.secondary{background:rgba(255,255,255,.08)}
-
-    .hidden{display:none}
-
-    /* ===== QUIZ ===== */
-    .question{
-      font-size:18px;
-      font-weight:800;
-      margin:12px 0;
-    }
     .option{
       background:var(--card);
       border:1px solid var(--border);
       padding:12px;
       border-radius:12px;
       margin-bottom:10px;
+      user-select:none;
       cursor:pointer;
     }
-    .option.correct{background:rgba(34,197,94,.2)}
-    .option.wrong{background:rgba(239,68,68,.2)}
+    .option.correct{background:rgba(34,197,94,.2);border-color:var(--good)}
+    .option.wrong{background:rgba(239,68,68,.2);border-color:var(--bad)}
+
+    .btn{
+      margin-top:12px;
+      padding:12px;
+      text-align:center;
+      border-radius:12px;
+      font-weight:900;
+      background:linear-gradient(135deg,var(--je-pink),var(--je-pink-dark));
+      border:1px solid rgba(255,255,255,.12);
+      user-select:none;
+      cursor:pointer;
+    }
+    .btn.secondary{background:rgba(255,255,255,.06)}
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap}
+    .btnRow .btn{flex:1}
+    .hidden{display:none}
 
     .result{text-align:center}
-    .result .score{font-size:34px;font-weight:1000;color:var(--je-pink)}
+    .result .score{font-size:34px;font-weight:1000;color:var(--je-pink);margin:10px 0}
+    .bonusLine{margin-top:6px;color:rgba(255,255,255,.9);font-weight:800}
+    .small{font-size:12px;color:rgba(255,255,255,.7);line-height:1.35}
 
-    .small{
-      font-size:12px;
-      color:rgba(255,255,255,.75);
-      line-height:1.35;
-      margin-top:6px;
+    /* Startscreen (zonder wit vlak) */
+    .start{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:10px 6px 6px;
+      text-align:center;
     }
+    .logoWrap{
+      width:100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:18px 0 8px;
+    }
+
+    /* Logo zelf: geen achtergrond, wel chique glow */
+    .logoPic{
+      display:inline-block;
+      padding:6px; /* klein beetje ademruimte zonder “kaart” */
+      border-radius:18px;
+      background: rgba(255,255,255,.00);
+      filter:
+        drop-shadow(0 18px 26px rgba(0,0,0,.35))
+        drop-shadow(0 0 22px rgba(230,0,92,.18));
+    }
+
+    img.logo{
+      width:min(360px, 86vw);
+      height:auto;
+      display:block;
+    }
+
+    .logoFallback{
+      font-size:72px;
+      font-weight:1000;
+      letter-spacing:-2px;
+      background:linear-gradient(135deg,var(--je-pink),var(--je-pink-dark));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      text-shadow:0 10px 25px rgba(0,0,0,.35);
+      line-height:1;
+      padding:10px 0;
+    }
+
+    /* +munten animatie */
+    .coinPopLayer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999}
+    .coinPop{
+      position:absolute;display:inline-flex;align-items:center;gap:8px;
+      padding:10px 12px;border-radius:999px;font-weight:1000;
+      background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.18);
+      backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+      transform:translate3d(0,0,0);
+      animation:floatUp 900ms ease-out forwards;
+    }
+    .coinPop .coinDot{width:18px;height:18px}
+    .coinPop .text{color:#fff;letter-spacing:.2px}
+    @keyframes floatUp{
+      0%{opacity:0;transform:translate3d(0,14px,0) scale(.96)}
+      15%{opacity:1;transform:translate3d(0,0,0) scale(1)}
+      85%{opacity:1;transform:translate3d(0,-34px,0) scale(1)}
+      100%{opacity:0;transform:translate3d(0,-48px,0) scale(1.02)}
+    }
+    .pulse{animation:pulse 320ms ease-out}
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+
+    /* Kleine toast voor "link gekopieerd" */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.18);
+      padding:10px 12px;
+      border-radius:999px;
+      color:#fff;
+      font-weight:800;
+      z-index:9999;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      opacity:0;
+      transition:opacity .18s ease;
+      pointer-events:none;
+    }
+    .toast.show{opacity:1;}
   </style>
 </head>
 
 <body>
-<div class="wrap">
-  <div class="header">
-    <div class="titles">
-      <h1>BBV Kennistoets</h1>
-      <small>JE Consultancy</small>
+  <div class="coinPopLayer" id="coinPopLayer"></div>
+  <div class="toast" id="toast">Link gekopieerd</div>
+
+  <div class="wrap">
+    <div class="header">
+      <div class="titles">
+        <h1>BBV Kennistoets</h1>
+        <small>JE Consultancy</small>
+      </div>
+      <div class="coins" id="coinsBadge">
+        <span class="coinDot" aria-hidden="true"></span>
+        Munten: <span id="coins">0</span>
+      </div>
     </div>
-  </div>
 
-  <div class="card">
+    <div class="card">
+      <!-- START VIEW -->
+      <div id="startView" class="start">
+        <div class="logoWrap">
+          <div class="logoPic">
+            <picture>
+              <source srcset="je-logo.avif" type="image/avif">
+              <img class="logo" id="jeLogo" src="je-logo.jpg" alt="JE Consultancy"
+                   onerror="this.style.display='none';document.getElementById('logoFallback').style.display='block'">
+            </picture>
+            <div class="logoFallback" id="logoFallback" style="display:none">JE</div>
+          </div>
+        </div>
 
-    <!-- START VIEW -->
-    <div id="startView" class="start">
-      <div class="logoWrap">
-        <div class="logoCard">
-          <picture>
-            <source srcset="je-logo.avif" type="image/avif">
-            <img src="je-logo.jpg" alt="JE Consultancy">
-          </picture>
+        <div class="small" style="margin-top:6px">
+          Elke ronde: <strong>10</strong> willekeurige vragen. Goed antwoord = <strong>+5 munten</strong>. 100% = <strong>+20 bonus</strong>.
+        </div>
+        <div id="startBtn" class="btn" style="margin-top:16px; width:100%">Start</div>
+      </div>
+
+      <!-- QUIZ VIEW -->
+      <div id="quizView" class="hidden">
+        <div class="top">
+          <div>Vraag <span id="qIndex">1</span>/<span id="qTotal">10</span></div>
+          <div>Score: <span id="score">0</span></div>
+        </div>
+
+        <div id="question" class="question"></div>
+        <div id="options"></div>
+
+        <div class="btnRow">
+          <div id="next" class="btn hidden">Volgende</div>
         </div>
       </div>
 
-      <div class="small">
-        Elke ronde: <strong>10</strong> vragen.<br>
-        Goed = <strong>+5 munten</strong> · 100% = <strong>+20 bonus</strong>
+      <!-- RESULT VIEW -->
+      <div id="resultView" class="result hidden">
+        <div class="score" id="percent">0%</div>
+        <div id="status" style="font-weight:900"></div>
+        <p>Score: <strong id="finalScore"></strong></p>
+        <p>Munten verdiend: <strong id="finalCoins"></strong></p>
+        <p class="bonusLine hidden" id="bonusLine"></p>
+
+        <div class="btnRow" style="margin-top:12px">
+          <div id="shareBtn" class="btn">Deel & nodig uit</div>
+          <div id="againBtn" class="btn secondary">Opnieuw (nieuwe set 10)</div>
+        </div>
+        <div class="btnRow">
+          <div id="backBtn" class="btn secondary">Terug naar beginscherm</div>
+        </div>
       </div>
-
-      <div id="startBtn" class="btn">Start</div>
     </div>
-
-    <!-- QUIZ VIEW -->
-    <div id="quizView" class="hidden">
-      <div id="question" class="question"></div>
-      <div id="options"></div>
-      <div id="nextBtn" class="btn hidden">Volgende</div>
-    </div>
-
-    <!-- RESULT VIEW -->
-    <div id="resultView" class="result hidden">
-      <div class="score" id="percent">0%</div>
-      <p id="finalScore"></p>
-
-      <div class="btn" onclick="shareScore()">Deel & nodig uit</div>
-      <div class="btn secondary" onclick="startQuiz()">Opnieuw</div>
-    </div>
-
   </div>
-</div>
 
-<script src="vragen.js"></script>
-<script>
-  const QUESTIONS_PER_RUN = 10;
-  let bank = window.BBV_QUESTIONS || [];
-  let questions = [];
-  let current = 0;
-  let score = 0;
+  <script src="vragen.js"></script>
+  <script>
+    // ===== Instellingen =====
+    const PASS_PERCENT = 70;
+    const QUESTIONS_PER_RUN = 10;
+    const COINS_PER_GOOD = 5;
+    const BONUS_COINS_100 = 20;
 
-  const startView = document.getElementById('startView');
-  const quizView = document.getElementById('quizView');
-  const resultView = document.getElementById('resultView');
-  const questionEl = document.getElementById('question');
-  const optionsEl = document.getElementById('options');
-  const nextBtn = document.getElementById('nextBtn');
+    // ===== State =====
+    let bank = (window.BBV_QUESTIONS || []);
+    let questions = [];
+    let current = 0;
+    let score = 0;
+    let coins = 0;
+    let answered = false;
 
-  function shuffle(arr){
-    return arr.sort(() => Math.random() - .5);
-  }
+    // ===== Elements =====
+    const startView = document.getElementById('startView');
+    const quizView = document.getElementById('quizView');
+    const resultView = document.getElementById('resultView');
 
-  function startQuiz(){
-    questions = shuffle([...bank]).slice(0, QUESTIONS_PER_RUN);
-    current = 0;
-    score = 0;
-    startView.classList.add('hidden');
-    resultView.classList.add('hidden');
-    quizView.classList.remove('hidden');
-    loadQuestion();
-  }
+    const startBtn = document.getElementById('startBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const againBtn = document.getElementById('againBtn');
+    const backBtn = document.getElementById('backBtn');
 
-  function loadQuestion(){
-    nextBtn.classList.add('hidden');
-    const q = questions[current];
-    questionEl.textContent = q.question;
-    optionsEl.innerHTML = '';
-    q.options.forEach((opt,i)=>{
-      const d = document.createElement('div');
-      d.className = 'option';
-      d.textContent = opt;
-      d.onclick = () => select(i,d,q.correct);
-      optionsEl.appendChild(d);
-    });
-  }
+    const qEl = document.getElementById('question');
+    const optEl = document.getElementById('options');
+    const nextBtn = document.getElementById('next');
+    const qIdx = document.getElementById('qIndex');
+    const qTot = document.getElementById('qTotal');
+    const scoreEl = document.getElementById('score');
+    const coinEl = document.getElementById('coins');
+    const coinsBadge = document.getElementById('coinsBadge');
+    const coinPopLayer = document.getElementById('coinPopLayer');
 
-  function select(i,el,correct){
-    document.querySelectorAll('.option').forEach(o=>o.onclick=null);
-    if(i===correct){
-      el.classList.add('correct');
-      score++;
-    } else {
-      el.classList.add('wrong');
-      document.querySelectorAll('.option')[correct].classList.add('correct');
+    const percentEl = document.getElementById('percent');
+    const statusEl = document.getElementById('status');
+    const finalScoreEl = document.getElementById('finalScore');
+    const finalCoinsEl = document.getElementById('finalCoins');
+    const bonusLine = document.getElementById('bonusLine');
+
+    const toast = document.getElementById('toast');
+
+    // ===== Helpers =====
+    function shuffle(a){
+      for(let i=a.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+      return a;
     }
-    nextBtn.classList.remove('hidden');
-  }
 
-  nextBtn.onclick = ()=>{
-    current++;
-    if(current < questions.length) loadQuestion();
-    else finish();
-  };
-
-  function finish(){
-    quizView.classList.add('hidden');
-    const pct = Math.round((score/questions.length)*100);
-    document.getElementById('percent').textContent = pct + '%';
-    document.getElementById('finalScore').textContent = `Score: ${score} / ${questions.length}`;
-    resultView.classList.remove('hidden');
-  }
-
-  document.getElementById('startBtn').onclick = startQuiz;
-
-  function shareScore(){
-    const url = location.href;
-    const text = `Ik deed de BBV Kennistoets en scoorde ${score}/${questions.length}. Doe jij hem ook?`;
-    if(navigator.share){
-      navigator.share({title:'BBV Kennistoets',text,url});
-    } else {
-      navigator.clipboard.writeText(text+' '+url);
-      alert('Link gekopieerd!');
+    function pickRandom(arr, n){
+      const copy = arr.slice();
+      shuffle(copy);
+      return copy.slice(0, Math.min(n, copy.length));
     }
-  }
-</script>
+
+    function show(view){
+      startView.classList.add('hidden');
+      quizView.classList.add('hidden');
+      resultView.classList.add('hidden');
+      view.classList.remove('hidden');
+    }
+
+    function showCoinPop(amount){
+      const rect = coinsBadge.getBoundingClientRect();
+      const x = Math.max(12, rect.left + rect.width/2 - 60);
+      const y = Math.max(12, rect.top + rect.height + 6);
+
+      const pop = document.createElement('div');
+      pop.className = 'coinPop';
+      pop.style.left = x + 'px';
+      pop.style.top  = y + 'px';
+
+      const dot = document.createElement('span');
+      dot.className = 'coinDot';
+
+      const txt = document.createElement('span');
+      txt.className = 'text';
+      txt.textContent = '+' + amount + ' munten';
+
+      pop.appendChild(dot);
+      pop.appendChild(txt);
+      coinPopLayer.appendChild(pop);
+
+      coinsBadge.classList.remove('pulse');
+      void coinsBadge.offsetWidth;
+      coinsBadge.classList.add('pulse');
+
+      pop.addEventListener('animationend', ()=>{
+        if(pop && pop.parentNode) pop.parentNode.removeChild(pop);
+      });
+    }
+
+    function toastMsg(msg){
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(()=> toast.classList.remove('show'), 1400);
+    }
+
+    // ===== Quiz =====
+    function startQuiz(){
+      questions = pickRandom(bank, QUESTIONS_PER_RUN);
+      current = 0;
+      score = 0;
+      coins = 0;
+      answered = false;
+
+      qTot.textContent = String(questions.length);
+      scoreEl.textContent = '0';
+      coinEl.textContent = '0';
+
+      bonusLine.classList.add('hidden');
+      bonusLine.textContent = '';
+
+      show(quizView);
+      loadQuestion();
+    }
+
+    function loadQuestion(){
+      answered = false;
+      nextBtn.classList.add('hidden');
+      optEl.innerHTML = '';
+
+      const q = questions[current];
+      qIdx.textContent = String(current+1);
+      qEl.textContent = q.question;
+
+      q.options.forEach((t,i)=>{
+        const d = document.createElement('div');
+        d.className = 'option';
+        d.textContent = t;
+        d.onclick = ()=> select(i,d);
+        optEl.appendChild(d);
+      });
+    }
+
+    function select(i, el){
+      if(answered) return;
+      answered = true;
+
+      const q = questions[current];
+      const all = document.querySelectorAll('.option');
+      for(const o of all){ o.onclick = null; }
+
+      if(i === q.correct){
+        el.classList.add('correct');
+        score++;
+        coins += COINS_PER_GOOD;
+        showCoinPop(COINS_PER_GOOD);
+      } else {
+        el.classList.add('wrong');
+        all[q.correct].classList.add('correct');
+      }
+
+      scoreEl.textContent = String(score);
+      coinEl.textContent = String(coins);
+      nextBtn.classList.remove('hidden');
+    }
+
+    function finish(){
+      const total = questions.length;
+      const pct = total ? Math.round((score/total)*100) : 0;
+
+      if(score === total && total > 0){
+        coins += BONUS_COINS_100;
+        coinEl.textContent = String(coins);
+        bonusLine.textContent = 'Bonus: +' + BONUS_COINS_100 + ' munten voor 100% score!';
+        bonusLine.classList.remove('hidden');
+        showCoinPop(BONUS_COINS_100);
+      }
+
+      percentEl.textContent = pct + '%';
+      statusEl.textContent = (pct >= PASS_PERCENT) ? 'Geslaagd' : 'Onvoldoende';
+      finalScoreEl.textContent = score + ' / ' + total;
+      finalCoinsEl.textContent = String(coins);
+
+      show(resultView);
+    }
+
+    nextBtn.onclick = ()=>{
+      current++;
+      if(current < questions.length) loadQuestion();
+      else finish();
+    };
+
+    // ===== Share =====
+    async function shareScore(){
+      const total = questions.length || QUESTIONS_PER_RUN;
+      const pct = total ? Math.round((score/total)*100) : 0;
+      const url = location.href;
+      const text = `Ik scoorde ${pct}% (${score}/${total}) in de BBV Kennistoets. Doe jij hem ook?`;
+
+      if(navigator.share){
+        try{
+          await navigator.share({ title: 'BBV Kennistoets', text, url });
+          return;
+        } catch(e) {}
+      }
+
+      const combined = text + ' ' + url;
+      try{
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          await navigator.clipboard.writeText(combined);
+          toastMsg('Link gekopieerd');
+          return;
+        }
+      } catch(e) {}
+
+      window.prompt('Kopieer en deel:', combined);
+    }
+
+    // ===== Buttons =====
+    startBtn.onclick = ()=>{
+      if(!bank || bank.length === 0){
+        qEl.textContent = 'Kon vragenbank niet laden. Controleer of vragen.js naast index.html staat.';
+        show(quizView);
+        return;
+      }
+      startQuiz();
+    };
+
+    againBtn.onclick = startQuiz;
+    backBtn.onclick = ()=> show(startView);
+    shareBtn.onclick = shareScore;
+
+    // init
+    show(startView);
+  </script>
 </body>
 </html>
