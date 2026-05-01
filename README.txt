@@ -3,17 +3,17 @@
 ## Bestanden
 - index.html  → de toets
 - vragen.js   → vragenbank (ca. 30 vragen)
+- je-logo.jpg → (optioneel) zet het JE-logo in dezelfde map en noem het exact zo.
 
-## Werking
-- Bij elke start kiest de toets willekeurig **10 vragen** uit de vragenbank.
-- Goed antwoord = +5 munten
-- 100% score = +20 bonusmunten
-- Cesuur (geslaagd) = 70%
+## Wat is aangepast
+- Begint met een beginscherm met groot JE-logo + Start knop.
+- Tijdens de toets géén 'Opnieuw' knop (alleen aan het eind).
+- Aan het eind een 'Deel & nodig uit' knop (Web Share API; fallback kopieert link).
+- Toelichting over scoring staat alleen op het beginscherm.
 
-## GitHub Pages (kort)
-1. Maak een repo.
-2. Upload **index.html** en **vragen.js** in de root.
-3. Settings → Pages → Deploy from branch → main / root.
-4. Open de Pages-URL op je iPhone in Safari.
+## GitHub Pages
+1. Upload index.html + vragen.js (en optioneel je-logo.jpg) in de root.
+2. Settings → Pages → Deploy from branch → main / root.
+3. Open de Pages-URL op je iPhone in Safari.
 
 Gegenereerd op 2026-05-01.
