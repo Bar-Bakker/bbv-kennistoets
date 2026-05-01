@@ -566,14 +566,20 @@
     }
 
     // ===== Buttons =====
-    startBtn.onclick = ()=>{
-      if(!bank || bank.length === 0){
-        qEl.textContent = 'Kon vragenbank niet laden. Controleer of vragen.js naast index.html staat.';
-        show(quizView);
-        return;
-      }
-      startQuiz();
-    };
+    
+startBtn.onclick = ()=>{
+  if(!bank || bank.length === 0){
+    qEl.textContent = 'Kon vragenbank niet laden.';
+    show(quizView);
+    return;
+  }
+
+  // 🔥 DIT WAS DE MISSENDE STAP
+  startView.classList.add('hidden');
+
+  startQuiz();
+};
+
 
     againBtn.onclick = startQuiz;
     backBtn.onclick = ()=> show(startView);
